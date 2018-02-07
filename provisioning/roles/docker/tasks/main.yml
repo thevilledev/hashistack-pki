@@ -1,0 +1,30 @@
+---
+- name: install deps
+  apt: 
+    name: "{{ item }}"
+    state: "present"
+    update_cache: true
+    install_recommends: False
+  with_items: 
+    - apt-transport-https
+    - gnupg2
+    - software-properties-common
+    - python-pip
+    - python-setuptools
+
+- name: install docker pgp key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: "present"
+
+- name: install docker apt repo
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
+
+- name: install docker
+  apt:
+    name: docker-ce={{ docker_version }}
+
+- name: install pip modules for docker
+  pip:
+    name: docker-py

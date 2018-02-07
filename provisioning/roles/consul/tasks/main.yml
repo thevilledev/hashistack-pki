@@ -1,0 +1,31 @@
+---
+- name: download consul binary
+  get_url:
+    url: "https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip"
+    checksum: "{{ consul_checksum }}"
+    dest: "/tmp/consul_{{ consul_version }}.zip"
+
+- name: install consul binary
+  unarchive:
+    remote_src: "yes"
+    src: "/tmp/consul_{{ consul_version }}.zip"
+    dest: "/usr/local/bin"
+
+- name: remove consul archive
+  file:
+    path: "/tmp/consul_{{ consul_version }}.zip"
+    state: "absent"
+
+- name: create consul config dir
+  file:
+    path: "/etc/consul.d"
+    state: "directory"
+
+- name: configure consul
+  template: src=config.json.j2 dest=/etc/consul.d/default.json
+
+- name: install systemd unit for consul
+  template: src=consul.service.j2 dest=/etc/systemd/system/consul.service
+
+- name: start consul service
+  systemd: state=started name=consul daemon_reload=yes

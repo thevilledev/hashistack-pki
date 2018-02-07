@@ -1,0 +1,12 @@
+---
+- name: install commonly used packages
+  apt: 
+    name: "{{ item }}"
+    state: "present"
+    update_cache: true
+    install_recommends: False
+  with_items: 
+    - curl
+    - unzip
+    - jq
+    - ca-certificates

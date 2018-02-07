@@ -1,0 +1,14 @@
+vagrant_private_ip: "192.168.33.102"
+
+docker_version: "17.12.0~ce-0~debian"
+
+consul_version: "1.0.3"
+consul_checksum: "sha256:4782e4662de8effe49e97c50b1a1233c03c0026881f6c004144cc3b73f446ec5"
+
+nomad_version: "0.7.1"
+nomad_checksum: "sha256:72b32799c2128ed9d2bb6cbf00c7600644a8d06c521a320e42d5493a5d8a789a"
+
+vault_version: "0.9.3"
+vault_checksum: "sha256:4ba8b9dafb903d20b4c87e8954015a07a6995f53a9650ac02b39e6cae502645e"
+
+nomad_token_ttl: "72h"

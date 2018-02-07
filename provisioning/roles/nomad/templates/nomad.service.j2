@@ -1,0 +1,16 @@
+[Unit]
+Description=nomad
+Requires=network-online.target consul.service
+After=network-online.target consul.service
+StartLimitIntervalSec=900
+StartLimitBurst=20
+
+[Service]
+ExecStart=/usr/local/bin/nomad agent -dev -config=/etc/nomad.d
+ExecReload=/bin/kill -HUP $MAINPID
+LimitNOFILE=65536
+RestartSec=30
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

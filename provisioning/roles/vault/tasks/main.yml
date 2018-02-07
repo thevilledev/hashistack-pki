@@ -1,0 +1,108 @@
+---
+- name: download vault binary
+  get_url:
+    url: "https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip"
+    checksum: "{{ vault_checksum }}"
+    dest: "/tmp/vault_{{ vault_version }}.zip"
+
+- name: install vault binary
+  unarchive:
+    remote_src: "yes"
+    src: "/tmp/vault_{{ vault_version }}.zip"
+    dest: "/usr/local/bin"
+
+- name: remove vault archive
+  file:
+    path: "/tmp/vault_{{ vault_version }}.zip"
+    state: "absent"
+
+- name: create vault config dir
+  file:
+    path: "/etc/vault.d"
+    state: "directory"
+
+- name: configure vault
+  template: src=config.hcl.j2 dest=/etc/vault.d/config.hcl
+
+- name: install systemd unit for vault
+  template: src=vault.service.j2 dest=/etc/systemd/system/vault.service
+
+- name: start vault service
+  systemd: state=started name=vault daemon_reload=yes
+
+# Uncomment to destroy Vault data upon deployment
+- name: destroy vault
+  command: /usr/local/bin/consul kv delete -recurse vault
+
+- name: init vault
+  command: /usr/local/bin/vault operator init
+  register: vault_keys
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+
+- set_fact:
+    vault_unseal_key_1: "{{ vault_keys.stdout | regex_search(regexp_key_1, '\\1') | first }}"
+    vault_unseal_key_2: "{{ vault_keys.stdout | regex_search(regexp_key_2, '\\1') | first}}"
+    vault_unseal_key_3: "{{ vault_keys.stdout | regex_search(regexp_key_3, '\\1') | first}}"
+    vault_unseal_key_4: "{{ vault_keys.stdout | regex_search(regexp_key_4, '\\1') | first}}"
+    vault_unseal_key_5: "{{ vault_keys.stdout | regex_search(regexp_key_5, '\\1') | first}}"
+    vault_root_token: "{{ vault_keys.stdout | regex_search(regexp_root_token, '\\1') | first}}"
+  vars:
+    regexp_key_1: "Unseal Key 1: (.*)\u001b.*"
+    regexp_key_2: "Unseal Key 2: (.*)\u001b.*"
+    regexp_key_3: "Unseal Key 3: (.*)\u001b.*"
+    regexp_key_4: "Unseal Key 4: (.*)\u001b.*"
+    regexp_key_5: "Unseal Key 5: (.*)\u001b.*"
+    regexp_root_token: "Initial Root Token: (.*)\u001b.*"
+
+# Print out unseal keys and root token
+- debug:
+    msg:
+      - "Unseal key 1: {{ vault_unseal_key_1 }}"
+      - "Unseal key 2: {{ vault_unseal_key_2 }}"
+      - "Unseal key 3: {{ vault_unseal_key_3 }}"
+      - "Unseal key 4: {{ vault_unseal_key_4 }}"
+      - "Unseal key 5: {{ vault_unseal_key_5 }}"
+      - "Root token: {{ vault_root_token }}"
+
+- name: unseal vault
+  command: "vault operator unseal {{ item }}"
+  with_items:
+    - "{{ vault_unseal_key_1 }}"
+    - "{{ vault_unseal_key_2 }}"
+    - "{{ vault_unseal_key_3 }}"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+
+- name: copy vault policies to host
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/"
+  with_items:
+    - "nomad-server-policy.hcl"
+    - "nomad-cluster-role.json"
+
+- name: install vault policies
+  command: "{{ item }}"
+  with_items:
+    - "vault policy write nomad-server /tmp/nomad-server-policy.hcl"
+    - "vault write /auth/token/roles/nomad-cluster @/tmp/nomad-cluster-role.json"
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: create vault token for nomad server
+  command: "vault token create -policy nomad-server -period {{ nomad_token_ttl }} -orphan -address=http://127.0.0.1:8200 -field token"
+  register: nomad_vault_token
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: create systemd config dir for nomad server
+  file:
+    path: "/etc/systemd/system/nomad.service.d"
+    state: "directory"
+
+- name: write nomad server vault token to environment file
+  template: src=nomad-env.conf.j2 dest=/etc/systemd/system/nomad.service.d/env.conf
+
