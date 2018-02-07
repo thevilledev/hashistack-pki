@@ -15,3 +15,26 @@
   file:
     path: "/tmp/terraform_{{ terraform_version }}.zip"
     state: "absent"
+
+- name: init terraform
+  command: chdir=/vagrant/tf /usr/local/bin/terraform init
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: destroy old terraform state if there is one
+  command: /usr/local/bin/consul kv delete terraform/hashistack-pki.tfstate
+
+# Has to be done separately for now since non-conforming external datasource is used
+# See: https://github.com/terraform-providers/terraform-provider-vault/issues/67
+- name: create pki mount
+  command: chdir=/vagrant/tf /usr/local/bin/terraform apply -target=module.vault_pki.vault_mount.pki -auto-approve
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"
+
+- name: apply terraform
+  command: chdir=/vagrant/tf /usr/local/bin/terraform apply -auto-approve
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_root_token }}"

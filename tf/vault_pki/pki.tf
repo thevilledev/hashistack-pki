@@ -7,8 +7,9 @@ resource "vault_mount" "pki" {
 }
 
 # Dirty hack as a workaround to init sub-CA in Vault
+# See: https://github.com/terraform-providers/terraform-provider-vault/issues/67
 data "external" "hack_intermediate_ca" {
-    program = [ "bash", "${path.module}/scripts/hack_intermediate_ca.sh"]
+    program = [ "bash", "${path.module}/scripts/hack_intermediate_ca.sh" ]
 }
 
 #resource "vault_generic_secret" "intermediate_ca" {
