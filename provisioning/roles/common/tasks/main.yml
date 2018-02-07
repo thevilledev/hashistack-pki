@@ -10,3 +10,13 @@
     - unzip
     - jq
     - ca-certificates
+    - resolvconf
+    - dnsmasq-base
+    - dnsmasq
+    - dnsutils
+
+- name: configure dnsmasq
+  copy: src=dnsmasq-consul.conf dest=/etc/dnsmasq.d/consul.conf
+
+- name: reload dnsmasq
+  systemd: name=dnsmasq state=reloaded

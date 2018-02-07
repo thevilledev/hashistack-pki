@@ -1,2 +1,4 @@
 .vagrant
 provisioning/standalone.retry
+tf/terraform.tfstate*
+tf/.terraform

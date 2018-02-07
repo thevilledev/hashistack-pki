@@ -3,8 +3,9 @@
   become: yes
   become_method: sudo
   roles:
-   - role: common
-   - role: docker
-   - role: consul
-   - role: vault
-   - role: nomad
+   #- role: common
+   #- role: docker
+   #- role: consul
+   #- role: vault
+   #- role: nomad
+   - role: terraform

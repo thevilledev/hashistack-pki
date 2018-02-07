@@ -11,4 +11,7 @@ nomad_checksum: "sha256:72b32799c2128ed9d2bb6cbf00c7600644a8d06c521a320e42d5493a
 vault_version: "0.9.3"
 vault_checksum: "sha256:4ba8b9dafb903d20b4c87e8954015a07a6995f53a9650ac02b39e6cae502645e"
 
+terraform_version: "0.11.3"
+terraform_checksum: "sha256:6b8a7b83954597d36bbed23913dd51bc253906c612a070a21db373eab71b277b"
+
 nomad_token_ttl: "72h"

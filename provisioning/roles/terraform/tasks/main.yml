@@ -1,0 +1,17 @@
+---
+- name: download terraform binary
+  get_url:
+    url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
+    checksum: "{{ terraform_checksum }}"
+    dest: "/tmp/terraform_{{ terraform_version }}.zip"
+
+- name: install terraform binary
+  unarchive:
+    remote_src: "yes"
+    src: "/tmp/terraform_{{ terraform_version }}.zip"
+    dest: "/usr/local/bin"
+
+- name: remove terraform archive
+  file:
+    path: "/tmp/terraform_{{ terraform_version }}.zip"
+    state: "absent"

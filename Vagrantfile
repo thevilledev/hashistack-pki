@@ -2,8 +2,8 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "debian/stretch64"
-
+  config.vm.box = "debian/contrib-stretch64"
+#  config.vm.synced_folder ".", "/vagrant", type: "virtualbox"
   config.vm.network "private_network", ip: "192.168.33.102"
   config.ssh.insert_key = true
   config.ssh.forward_agent = true
