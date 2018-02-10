@@ -6,7 +6,7 @@ StartLimitIntervalSec=900
 StartLimitBurst=20
 
 [Service]
-ExecStart=/usr/local/bin/nomad agent -dev -config=/etc/nomad.d
+ExecStart=/usr/local/bin/nomad agent -config=/etc/nomad.d
 ExecReload=/bin/kill -HUP $MAINPID
 LimitNOFILE=65536
 RestartSec=30

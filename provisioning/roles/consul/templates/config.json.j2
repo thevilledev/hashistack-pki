@@ -4,9 +4,9 @@
   "log_level": "INFO",
   "data_dir": "/var/lib/consul",
   "ui": true,
-  "client_addr": "127.0.0.1",
-  "bind_addr": "127.0.0.1",
-  "advertise_addr": "127.0.0.1",
+  "client_addr": "0.0.0.0",
+  "bind_addr": "0.0.0.0",
+  "advertise_addr": "{{ vagrant_private_ip }}",
   "recursors": ["8.8.8.8"],
   "disable_remote_exec": false
 }
