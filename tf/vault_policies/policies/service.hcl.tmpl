@@ -1,0 +1,8 @@
+# Services have to be able to issue certificates
+# for '*.service.consul'. A more granular ACL would
+# be better, so that service 'foo' would only be able
+# to issue certificates with CN 'foo.service.consul' but
+# to make things easier for this test a wildcard is used.
+path "pki/issue/service-consul" {
+    capabilities = [ "create", "read", "update" ]
+}

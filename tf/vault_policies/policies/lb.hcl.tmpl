@@ -1,0 +1,6 @@
+# Load balancer has to be able to issue certificated
+# with CN of '*.query.consul'. Prepared queries in Consul
+# will map all '*.query.consul' requests to 'lb.service.consul'.
+path "pki/issue/query-consul" {
+    capabilities = [ "create", "read", "update" ]
+}

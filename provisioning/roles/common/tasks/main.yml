@@ -18,5 +18,5 @@
 - name: configure dnsmasq
   copy: src=dnsmasq-consul.conf dest=/etc/dnsmasq.d/consul.conf
 
-- name: reload dnsmasq
-  systemd: name=dnsmasq state=reloaded
+- name: start dnsmasq
+  systemd: name=dnsmasq state=started

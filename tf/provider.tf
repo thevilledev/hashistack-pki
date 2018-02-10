@@ -6,6 +6,8 @@ provider "external" {}
 
 provider "tls" {}
 
+provider "template" {}
+
 terraform {
   backend "consul" {
     address = "consul.service.consul:8500"

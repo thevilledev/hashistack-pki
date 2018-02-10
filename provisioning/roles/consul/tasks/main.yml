@@ -30,5 +30,5 @@
 - name: start consul service
   systemd: name=consul state=started daemon_reload=yes
 
-- name: reload dnsmasq
-  systemd: name=dnsmasq state=reloaded
+- name: restart dnsmasq
+  systemd: name=dnsmasq state=restarted
