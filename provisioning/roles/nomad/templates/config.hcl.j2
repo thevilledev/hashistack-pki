@@ -16,6 +16,9 @@ server {
 client {
   enabled       = true
   network_speed = 10
+  # Bind to eth1 so we can access services
+  # from the host machine running this VM
+  network_interface = "eth1"
   options {
     "driver.raw_exec.enable" = "1"
   }
