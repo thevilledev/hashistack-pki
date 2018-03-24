@@ -17,6 +17,15 @@ This environment has the following services built in:
 Provisioning is handled by Ansible. Ansible calls Terraform to set up Vault and Consul
 configuration, which cannot be configured through config files.
 
+# Project structure
+
+- `provisioning/`: Ansible configuration
+    - `group_vars`: Global variables for selecting Vault/Nomad/Terraform/Consul versions
+    - `roles`: Ansible roles for each component
+- `jobs`: Nomad jobs for running load balancer and app
+- `tf`: Terraform configuration
+
+
 # PKI setup
 
 PKI is initialized as follows:
