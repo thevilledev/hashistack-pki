@@ -1,0 +1,6 @@
+---
+- name: start load balancer
+  command: chdir=/vagrant/jobs nomad run lb.hcl
+
+- name: start test app
+  command: chdir=/vagrant/jobs nomad run app.hcl

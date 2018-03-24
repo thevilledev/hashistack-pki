@@ -7,5 +7,6 @@
    - role: docker
    - role: consul
    - role: vault
-   - role: nomad
+   - role: nomad-server
    - role: terraform
+   - role: nomad-client
