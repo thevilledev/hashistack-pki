@@ -2,6 +2,11 @@ provider "vault" {
   address = "http://vault.service.consul:8200"
 }
 
+provider "consul" {
+  datacenter = "dc1"
+  address    = "consul.service.consul:8500"
+}
+
 provider "external" {}
 
 provider "tls" {}

@@ -1,21 +1,32 @@
 # hashistack-pki
 
 Create your own local environment for trying out auto-generated TLS certificates.
-Test environment is run on a Debian Stretch machine on top of VirtualBox. It's
+Test environment is run on a Debian Stretch machine on top of VirtualBox. This environment
 suitable for testing out Nomad and Vault PKI, but also HTTP/2 and service orchestration
 in general.
 
 This environment has the following services built in:
 
-- Consul server for storage backend and service discovery
-- Vault server for PKI
-- Nomad client & server
+- [Consul](https://www.consul.io/) server for storage backend and service discovery
+- [Vault](https://www.vaultproject.io/) server for PKI
+- [Nomad](https://www.nomadproject.io/) client & server
 - Docker for running Nomad jobs
-- Fabio running in a container as a load balancer
-- Sample Go application running in a container
+- [Fabio](https://github.com/fabiolb/fabio) running in a container as a load balancer
+- [Sample Go application](https://github.com/vtorhonen/go-vault-pki/tree/master/examples/demo-app) running in a container. [Available on Dockerhub](https://hub.docker.com/r/vtorhonen/vault-pki-demo-app/).
 
-Provisioning is handled by Ansible. Ansible calls Terraform to set up Vault PKI and Terraform
-uses Consul as a storage backend.
+Provisioning is handled by Ansible. Ansible calls Terraform to set up Vault and Consul
+configuration, which cannot be configured through config files.
+
+# PKI setup
+
+PKI is initialized as follows:
+
+- Root CA is issued by Terraform.
+- Vault PKI is initialized by creating a CSR for a sub-CA.
+- Terraform signs the certificate request for sub-CA.
+- Vault installs sub-CA certificate to its PKI.
+
+Sub-CA private key is never exported and actually cannot even be exported from Vault.
 
 # How do I use this?
 
@@ -36,13 +47,13 @@ lb   service  50        running  03/24/18 15:05:12 GMT
 
 After Ansible has finished provisioning you then have the following two Nomad jobs running:
 
-- `app` is a Go sample application which prints "welcome". It registers to Consul by service name "testapp".
+- `app` is a Go sample application which prints "welcome" and gives HTTP 200 as a response. It registers to Consul by service name "testapp".
 - `lb`: load balancer which uses healthy Consul services as backend and adds them automatically to its configuration. It also auto-generates TLS certificates and also renews them.
 
-You can verify that the setup is working by running the following command:
+Verify that the setup is working by running the following command:
 
 ```
-$ curl -k --resolve testapp-lb.query.consul:443:192.168.33.102 https://testapp-lb.query.consul
+$ curl -vk https://testapp-lb.query.consul
 ...
 * Server certificate:
 *  subject: CN=testapp-lb.query.consul
@@ -63,7 +74,13 @@ welcome
 
 From this we can see that our load balancer supports HTTP/2 and is serving
 content by using TLS certificate with a Common Name (CN) of `testapp-lb.query.consul`.
-Finally check the load balancers logs:
+You can also run the command from the host machine by using correct SNI hostname mapping.
+
+```
+$ curl -vk --resolve testapp-lb.query.consul:443:192.168.33.102 https://testapp-lb.query.consul
+```
+
+Finally check the load balancer logs:
 
 ```
 $ nomad status lb | grep ' run '
